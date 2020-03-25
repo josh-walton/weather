@@ -17,6 +17,30 @@ raw$DATE <- ymd_hms(raw$DATE, truncated = 3)
 raw$DATE <- as.POSIXct(raw$DATE)
 
 # Hourly data only
-hourly.raw <- raw %>% 
-  filter(REPORT_TYPE == "FM-15")
 
+hourly.raw <- raw %>% 
+  filter(REPORT_TYPE == "FM-15") %>% 
+  select(DATE, HourlyDewPointTemperature, HourlyDryBulbTemperature, HourlyPrecipitation, HourlyRelativeHumidity, HourlySkyConditions, HourlyWetBulbTemperature, HourlyWindDirection, HourlyWindSpeed, ) %>% 
+  rename(time = "DATE",
+         dewpoint = "HourlyDewPointTemperature",
+         dry.bulb = "HourlyDryBulbTemperature",
+         precipitation = "HourlyPrecipitation",
+         relative.humidity = "HourlyRelativeHumidity",
+         sky.condition = "HourlySkyConditions",
+         wet.bulb = "HourlyWetBulbTemperature",
+         wind.direction = "HourlyWindDirection",
+         wind.speed = "HourlyWindSpeed")
+
+
+# Turn precipitation "T" into "0.001"
+
+hourly.raw <- hourly.raw %>% 
+  mutate(precipitation = replace(hourly.raw$precipitation, hourly.raw$precipitation == "T", "0.001"))
+
+# Set columns that are numeric
+
+num.columns <- c("dewpoint", "dry.bulb", "precipitation", "relative.humidity", "wet.bulb", "wind.direction", "wind.speed")
+
+# Transform certain columns to numeric
+
+hourly.raw <- mutate_each(hourly.raw, funs(as.numeric), all_of(num.columns))
