@@ -44,3 +44,9 @@ num.columns <- c("dewpoint", "dry.bulb", "precipitation", "relative.humidity", "
 # Transform certain columns to numeric
 
 hourly.raw <- mutate_each(hourly.raw, funs(as.numeric), all_of(num.columns))
+
+# Exploratory Analysis ####
+
+hourly.raw %>% 
+  filter(wet.bulb > 75) %>% 
+  filter(time > "2018-12-31 01:00:00")
