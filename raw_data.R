@@ -10,6 +10,8 @@ library(lubridate)
 
 raw <- read.csv("Tulsa Airport Hourly 2016-2020.csv", header = T, stringsAsFactors = F)
 
+# Tidying data ####
+
 # Change date format
 
 raw$DATE <- ymd_hms(raw$DATE, truncated = 3)
@@ -29,8 +31,20 @@ hourly.raw <- raw %>%
          sky.condition = "HourlySkyConditions",
          wet.bulb = "HourlyWetBulbTemperature",
          wind.direction = "HourlyWindDirection",
-         wind.speed = "HourlyWindSpeed")
+         wind.speed = "HourlyWindSpeed") %>% 
+  drop_na()
 
+# Set sky condition variables
+
+cloud.conditions <- c("CLR", "FEW", "BKN", "SCT", "OVC")
+
+hourly.raw$sky.code <- str_sub(hourly.raw$sky.condition, 1, 3)
+hourly.raw$oktas <- str_sub(hourly.raw$sky.condition, 5, 6)
+
+# Remove codes, only need oktas per hour
+
+hourly.raw <- hourly.raw %>% 
+  select(time, dewpoint, dry.bulb, wet.bulb, precipitation, relative.humidity, oktas, wind.direction, wind.speed)
 
 # Turn precipitation "T" into "0.001"
 
@@ -39,7 +53,7 @@ hourly.raw <- hourly.raw %>%
 
 # Set columns that are numeric
 
-num.columns <- c("dewpoint", "dry.bulb", "precipitation", "relative.humidity", "wet.bulb", "wind.direction", "wind.speed")
+num.columns <- c("dewpoint", "dry.bulb", "precipitation", "relative.humidity", "wet.bulb", "wind.direction", "wind.speed", "oktas")
 
 # Transform certain columns to numeric
 
@@ -50,3 +64,6 @@ hourly.raw <- mutate_each(hourly.raw, funs(as.numeric), all_of(num.columns))
 hourly.raw %>% 
   filter(between(wet.bulb, 65, 75)) %>% 
   count(sort = T)
+
+hourly.raw %>% 
+  count(sky.condition, sort = T)
