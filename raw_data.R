@@ -59,11 +59,31 @@ num.columns <- c("dewpoint", "dry.bulb", "precipitation", "relative.humidity", "
 
 hourly.raw <- mutate_each(hourly.raw, funs(as.numeric), all_of(num.columns))
 
+# Filter times to be daytime hours
+
+active.hours <- hourly.raw %>% 
+  filter(hour(time) >= 6 & hour(time) < 22)
+
+# Summarize data by date with daytime hours
+
+active.hours$date <- as.Date(active.hours$time)
+
+day.summary <- active.hours %>% 
+  group_by(date) %>% 
+  summarise(temp.avg = mean(dry.bulb),
+            dewpoint.avg = mean(dewpoint),
+            precipitation.avg = mean(precipitation),
+            oktas.avg = mean(oktas),
+            windspeed.avg = mean(wind.speed))
+
 # Exploratory Analysis ####
 
-hourly.raw %>% 
-  filter(between(wet.bulb, 65, 75)) %>% 
-  count(sort = T)
+# Filter day.summary with parameters
 
-hourly.raw %>% 
-  count(sky.condition, sort = T)
+perfect.days <- day.summary %>% 
+  group_by(date) %>% 
+  filter(between(temp.avg, 65, 75),
+         dewpoint.avg < 60,
+         precipitation.avg == 0,
+         oktas.avg <= 5,
+         windspeed.avg < 15)
