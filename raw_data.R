@@ -5,6 +5,8 @@ library(dplyr)
 library(janitor)
 library(data.table)
 library(lubridate)
+library(forecast)
+library(stats)
 
 # Import data ####
 
@@ -85,5 +87,18 @@ perfect.days <- day.summary %>%
   filter(between(temp.avg, 65, 75),
          dewpoint.avg < 60,
          precipitation.avg == 0,
-         oktas.avg <= 5,
+         oktas.avg <= 6,
          windspeed.avg < 15)
+
+
+# Plots ####
+
+# Bar graph of perfect days per month
+
+perf.days.count <- perfect.days %>%
+  select(date) %>% 
+  group_by(date) %>% 
+  count(date, sort = T) %>% 
+  rename(days = "n")
+
+ts(perf.days.count$days, start = c(2016, 1), end = c(2019, 12), frequency = 12)
