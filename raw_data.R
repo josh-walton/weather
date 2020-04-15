@@ -95,10 +95,9 @@ perfect.days <- day.summary %>%
 
 # Bar graph of perfect days per month
 
-perf.days.count <- perfect.days %>%
-  select(date) %>% 
-  group_by(date) %>% 
+perf.days.count <- perfect.days %>% 
+  group_by(month = floor_date(date, "month")) %>% 
   count(date, sort = T) %>% 
-  rename(days = "n")
+  summarise(days = sum(n))
 
 ts(perf.days.count$days, start = c(2016, 1), end = c(2019, 12), frequency = 12)
