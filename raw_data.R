@@ -100,4 +100,12 @@ perf.days.count <- perfect.days %>%
   count(date, sort = T) %>% 
   summarise(days = sum(n))
 
-ts(perf.days.count$days, start = c(2016, 1), end = c(2019, 12), frequency = 12)
+# perf.days.count$month <- factor(perf.days.count$month, levels = month.abb)
+
+perf.days.count %>% 
+  ggplot(aes(x = month, y = days)) +
+  stat_summary(fun.y = sum, geom = "bar") +
+  scale_x_date(date_labels = "%b", date_breaks = "1 month") +
+  facet_grid(facets = year(month) ~ .)
+
+# ts(perf.days.count$days, start = c(2016, 1), end = c(2019, 12), frequency = 12)
