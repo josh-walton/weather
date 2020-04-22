@@ -100,13 +100,23 @@ perf.days.count <- perfect.days %>%
   count(date, sort = T) %>% 
   summarise(days = sum(n))
 
-# perf.days.count$Month <- factor(perf.days.count$month, levels = month.abb)
+perf.days.count$Month <- month(perf.days.count$month, label = T)
 
-perf.days.count %>% 
+# Trial ####
+
+sixteen <- perf.days.count %>% 
+  filter(month <= as.POSIXct("2017-01-01"))
+
+trial <- sixteen %>% 
   ggplot(aes(x = month, y = days)) +
   stat_summary(fun = sum, geom = "bar") +
-  facet_wrap(~year(month), scales = "free_x") +
-  scale_x_date(date_labels = "%b", date_breaks = "1 month")
+  scale_x_date(date_labels = "%b")
+
+trial
+
+
+  # facet_wrap(~year(month), scales = "free_x") +
+  # scale_x_date(date_labels = "%b", date_breaks = "1 month")
 
 # facet_grid(facets = year(month) ~ .)
 
