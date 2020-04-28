@@ -7,6 +7,7 @@ library(data.table)
 library(lubridate)
 library(forecast)
 library(stats)
+library(forcats)
 
 # Import data ####
 
@@ -96,28 +97,21 @@ perfect.days <- day.summary %>%
 # Bar graph of perfect days per month
 
 perf.days.count <- perfect.days %>% 
-  group_by(month = floor_date(date, "month")) %>% 
   count(date, sort = T) %>% 
-  summarise(days = sum(n))
+  summarise(count = sum(n))
 
-perf.days.count$Month <- month(perf.days.count$month, label = T)
-
-# Trial ####
-
-sixteen <- perf.days.count %>% 
-  filter(month <= as.POSIXct("2017-01-01"))
-
-trial <- sixteen %>% 
-  ggplot(aes(x = month, y = days)) +
-  stat_summary(fun = sum, geom = "bar") +
-  scale_x_date(date_labels = "%b")
-
-trial
+perf.days.count <- perf.days.count %>% 
+  mutate(month = month(date, label = T)) %>% 
+  group_by(month) %>%
+  summarise(perf.days = sum(count)) %>% 
+  mutate(month = factor(month, levels = month.abb))
+  
+perf.days.count %>% 
+  ggplot(aes(month, perf.days)) +
+  geom_bar(stat = "identity") +
+  scale_x_discrete(limits = month.abb)
 
 
-  # facet_wrap(~year(month), scales = "free_x") +
-  # scale_x_date(date_labels = "%b", date_breaks = "1 month")
 
-# facet_grid(facets = year(month) ~ .)
 
-# ts(perf.days.count$days, start = c(2016, 1), end = c(2019, 12), frequency = 12)
+
