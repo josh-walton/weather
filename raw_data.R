@@ -96,6 +96,22 @@ perfect.days <- day.summary %>%
 
 # Bar graph of perfect days per month
 
+# Previous code with year ####
+perf.days.count <- perfect.days %>% 
+  group_by(month = floor_date(date, "month")) %>% 
+  count(date, sort = T) %>% 
+  summarise(days = sum(n))
+
+
+perf.days.count %>% 
+  ggplot(aes(x = month, y = days)) +
+  stat_summary(fun = sum, geom = "bar") +
+  facet_wrap(~year(month), scales = "free_x") +
+  scale_x_date(date_labels = "%b", date_breaks = "1 month")
+
+
+# With full months ####
+
 perf.days.count <- perfect.days %>% 
   count(date, sort = T) %>% 
   summarise(count = sum(n))
